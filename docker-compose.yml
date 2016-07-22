@@ -1,0 +1,41 @@
+version: '2'
+services:
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    links:
+      - influxdb
+  influxdb:
+    image: tutum/influxdb:0.13
+    container_name: influxdb
+    restart: always
+    ports:
+      - '8083:8083'
+      - '8086:8086'
+      - '25826:25826/udp'
+    expose:
+      - '8083'
+      - '8086'
+      - '25826/udp'
+    environment:
+      - ADMIN_USER=root
+      - INFLUXDB_INIT_PWD=toor
+      - PRE_CREATE_DB=collectd
+      - COLLECTD_DB=collectd
+      - COLLECTD_BINDING=0.0.0.0:25826
+  collectd:
+    build: docker-collectd/
+    container_name: collectd
+    restart: always
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/etc/hostname:/mnt/hostname:ro'
+      - '/proc:/mnt/proc:ro'
+      - '/etc:/mnt/etc:ro'
+    environment:
+      - HOST_NAME=test.host
+      - INFLUXDB_PORT_25826_UDP_ADDR=influxdb
+      - INFLUXDB_PORT_25826_UDP_PORT=25826
+    links:
+      - influxdb
