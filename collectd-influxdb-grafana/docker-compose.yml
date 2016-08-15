@@ -1,7 +1,8 @@
 version: '2'
 services:
   grafana:
-    image: grafana/grafana:latest
+    image: oisis/grafana
+    container_name: grafana
     ports:
       - "3000:3000"
     links:
@@ -25,7 +26,7 @@ services:
       - COLLECTD_DB=collectd
       - COLLECTD_BINDING=0.0.0.0:25826
   collectd:
-    build: docker-collectd/
+    image: oisis/collectd
     container_name: collectd
     restart: always
     volumes:
@@ -35,7 +36,7 @@ services:
       - '/etc:/mnt/etc:ro'
     environment:
       - HOST_NAME=test.host
-      - INFLUXDB_PORT_25826_UDP_ADDR=influxdb
-      - INFLUXDB_PORT_25826_UDP_PORT=25826
+      - INFLUXDB_ADDR=influxdb
+      - INFLUXDB_PORT=25826
     links:
       - influxdb

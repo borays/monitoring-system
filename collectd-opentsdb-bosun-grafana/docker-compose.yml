@@ -1,0 +1,61 @@
+version: '2'
+services:
+  grafana:
+    image: oisis/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    links:
+      - opentsdb
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource,grafana-clock-panel,bosun-app
+      - GRAFANA_DATASOURCES=opentsdb
+      - GRAFANA_USER=admin
+      - GRAFANA_PASS=admin
+      - OPENTSDB_HOST=opentsdb
+      - OPENTSDB_PORT=4242
+      - OPENTSDB_ACCESS=direct
+      - OPENTSDB_RESOLUTION=second
+    expose:
+      - '3000'
+  opentsdb:
+    image: petergrace/opentsdb-docker
+    container_name: opentsdb
+    restart: always
+    ports:
+      - '4242:4242'
+      - '16010:16010'
+    expose:
+      - '4242'
+      - '16010'
+  collectd:
+    image: oisis/collectd
+    container_name: collectd
+    restart: always
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/etc/hostname:/mnt/hostname:ro'
+      - '/proc:/mnt/proc:ro'
+      - '/etc:/mnt/etc:ro'
+    environment:
+      - HOST_NAME=test.host
+      - OPENTSDB_ADDR=opentsdb
+      - OPENTSDB_PORT=4242
+    links:
+      - opentsdb
+  bosun:
+    build: docker-bosun
+    container_name: bosun
+    restart: always
+    environment:
+      - OPENTSDB_HOST=opentsdb
+      - OPENTSDB_PORT=4242
+      - OPENTSDB_VERSION=2.2
+    ports:
+      - "8070:8070"
+    links:
+      - grafana
+      - opentsdb
+    expose:
+      - '4242'
+      - '8070'
