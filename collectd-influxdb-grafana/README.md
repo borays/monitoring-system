@@ -1,6 +1,6 @@
 ## Monitoring system:
 
-* Used tools:
+### Used tools:
 
 * Collectd
 * InfluxDB
@@ -17,3 +17,6 @@
 
 ###4. Remove stopped cointainers:
 ```docker-compose rm -f```
+
+TODO list:
+- add support for [Kapacitor](https://influxdata.com/time-series-platform/kapacitor/) ?
